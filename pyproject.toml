@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "dcmtools"
+version = "1.0.0"
+description = "dcm4chee study mover CLI with Typer (single/batch, validate-csv, OAuth2 refresh)"
+authors = ["Alexandre Santos <ajvsms@gmail.com>"]
+readme = "README.md"
+license = "MIT"
+packages = [{ include = "dcmtools", from = "src" }]
+# optional, but nice
+keywords = ["dicom", "dcm4chee", "cli", "typer", "healthcare"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Environment :: Console",
+  "Topic :: Scientific/Engineering :: Medical Science Apps."
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+typer = { extras = ["all"], version = "^0.20.0" }
+requests = "^2.32.0"
+pydicom = "^3.0.0"
+poetry-core = ">=1.9.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+ruff = "^0.7.0"
+mypy = "^1.8.0"
+
+[tool.poetry.scripts]
+# <command-name> = "<module path>:<callable>"
+dcmtools = "dcmtools.cli:app"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
