@@ -6,6 +6,30 @@ import requests
 
 MOVE_CODE = "113037^DCM"  # vendor-specific path segment
 
+
+def get_study_attributes_call(
+    base_url: str,
+    aet: str,
+    bearer_token: str,
+    study_uid: str,
+    insecure: bool = False,
+    timeout: int = 60,
+) -> requests.Response:
+    """
+    GET {base}/dcm4chee-arc/aets/{AET}/rs/studies/{StudyInstanceUID}
+    """
+    path = (
+        f"/dcm4chee-arc/aets/{urllib.parse.quote(aet, safe='')}/rs/"
+        f"studies/{urllib.parse.quote(study_uid, safe='')}"
+    )
+    url = base_url.rstrip("/") + path
+    headers = {
+        "Authorization": f"Bearer {bearer_token}",
+        "Accept": "application/json",
+    }
+    return requests.get(url, headers=headers, timeout=timeout, verify=not insecure)
+
+
 def move_study_call(
     base_url: str,
     aet: str,
@@ -35,6 +59,7 @@ def move_study_call(
     }
     payload = {"StudyInstanceUID": source_study_uid}
     return requests.post(url, params=params, headers=headers, json=payload, timeout=timeout, verify=not insecure)
+
 
 def decode_response_body(resp: requests.Response):
     try:

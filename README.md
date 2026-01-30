@@ -8,6 +8,7 @@ Built with [Typer](https://typer.tiangolo.com) for a fast, friendly command-line
 ## ✨ Features
 
 - **Move studies** from one patient to another using dcm4chee’s REST `/move/113037^DCM` endpoint  
+- **Inspect study attributes** to verify details like `InstitutionName`
 - **Batch mode** with CSV input and concurrent transfers (`--concurrency`)  
 - **Automatic OAuth2 token refresh** (Keycloak-compatible)  
 - **CSV validator** to detect duplicates or missing fields before running  
@@ -56,11 +57,8 @@ dcmtools --help
 
 `dcmtools` communicates with your dcm4chee archive via REST:
 
-```
-POST /dcm4chee-arc/aets/{AET}/rs/studies/{TargetStudyUID}/move/113037^DCM
-?PatientID={NewPID}&IssuerOfPatientID={Issuer}
-Body: {"StudyInstanceUID":"{SourceStudyInstanceUID}"}
-```
+- **Show Study**: `GET /dcm4chee-arc/aets/{AET}/rs/studies/{StudyUID}`
+- **Move Study**: `POST /dcm4chee-arc/aets/{AET}/rs/studies/{TargetStudyUID}/move/113037^DCM`
 
 The tool builds these calls automatically.
 
@@ -103,7 +101,21 @@ Output:
 }
 ```
 
-### 2️⃣ Move a single study
+### 2️⃣ Show study attributes
+
+Retrieve and print study attributes as JSON. This is useful for inspecting a study's details, such as the `InstitutionName`.
+
+```bash
+dcmtools show-study \
+  --base-url "https://service.vna.example:8443" \
+  --aet "CUFVNAQUAA" \
+  --study-uid "1.2.3.4.5.6" \
+  --token "your-bearer-token"
+```
+
+This will output a JSON object with the study's DICOM attributes.
+
+### 3️⃣ Move a single study
 
 Move one StudyInstanceUID from one patient to another.
 
@@ -120,7 +132,7 @@ dcmtools move-one \
   --insecure
 ```
 
-### 3️⃣ Batch move from CSV
+### 4️⃣ Batch move from CSV
 
 Move multiple studies in parallel.
 
@@ -220,6 +232,7 @@ Created for internal CUF / JMS Lab tooling.
 | Command | Description |
 |----------|--------------|
 | `dcmtools validate-csv` | Validate CSV file structure and data |
+| `dcmtools show-study` | Retrieve and print study attributes |
 | `dcmtools move-one` | Move a single study |
 | `dcmtools move-batch` | Move multiple studies concurrently |
 | `--dry-run` | Simulate without API calls |

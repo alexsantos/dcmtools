@@ -4,12 +4,48 @@ from typing import Dict, List, Optional
 
 import typer
 
-from .api import move_study_call, decode_response_body
+from .api import get_study_attributes_call, move_study_call, decode_response_body
 from .auth import TokenManager
 from .csv_tools import validate_csv_file, iter_rows
 from .uid import make_target_study_uid, DEFAULT_ORG_UID_ROOT
 
 app = typer.Typer(help="Move dcm4chee studies between patients (single/batch), with validation & concurrency.")
+
+
+# -------------------- show-study --------------------
+
+@app.command("show-study")
+def show_study(
+    base_url: str = typer.Option(..., help="e.g., https://host:8443"),
+    aet: str = typer.Option(..., help="Archive AE Title, e.g., CUFVNAQUAA"),
+    study_uid: str = typer.Option(..., help="StudyInstanceUID to query"),
+    timeout: int = typer.Option(60, help="HTTP timeout seconds"),
+    insecure: bool = typer.Option(False, "--insecure", help="Allow insecure TLS"),
+    # Auth
+    token: Optional[str] = typer.Option(None, help="Static Bearer token"),
+    token_endpoint: Optional[str] = typer.Option(None, help="OAuth2 token endpoint"),
+    client_id: Optional[str] = typer.Option(None, help="OAuth2 client_id"),
+    client_secret: Optional[str] = typer.Option(None, help="OAuth2 client_secret"),
+    scope: Optional[str] = typer.Option(None, help="OAuth2 scope"),
+):
+    """Retrieve and print study attributes as JSON."""
+    tm = build_token_manager(token, token_endpoint, client_id, client_secret, scope, insecure, timeout)
+    bearer = tm.get()
+
+    resp = get_study_attributes_call(base_url, aet, bearer, study_uid, insecure=insecure, timeout=timeout)
+    if resp.status_code == 401 and not token:
+        bearer = tm.get(force_refresh=True)
+        resp = get_study_attributes_call(base_url, aet, bearer, study_uid, insecure=insecure, timeout=timeout)
+
+    body = decode_response_body(resp)
+    if resp.status_code == 200:
+        typer.secho(f"OK HTTP {resp.status_code}", fg=typer.colors.GREEN)
+        print(json.dumps(body, indent=2))
+    else:
+        typer.secho(f"ERROR HTTP {resp.status_code}", fg=typer.colors.RED)
+        print(json.dumps({"status": "error", "http": resp.status_code, "response": body}, indent=2))
+        raise typer.Exit(code=1)
+
 
 # -------------------- validate-csv --------------------
 

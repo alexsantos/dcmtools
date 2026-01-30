@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dcmtools"
-version = "1.0.0"
+version = "1.1.0"
 description = "dcm4chee study mover CLI with Typer (single/batch, validate-csv, OAuth2 refresh)"
 authors = ["Alexandre Santos <ajvsms@gmail.com>"]
 readme = "README.md"
@@ -17,8 +17,8 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.11"
-typer = { extras = ["all"], version = "^0.20.0" }
-requests = "^2.32.0"
+typer = { extras = ["all"], version = "^0.21.1" }
+requests = "^2.32.5"
 pydicom = "^3.0.0"
 poetry-core = ">=1.9.0"
 
